@@ -9,19 +9,19 @@
     
       https://github.com/siddy15/nr-dashboard-export-json-pdf-png.git
       cd nr-entities-export-csv-json
-      npm install
-
+      pip3 install requests, openpyxl
+    
 ### Set env variable API_KEY and export data
-    export API_KEY="YOUR NR USER KEY"
+        export API_KEY="YOUR NR USER KEY"
     
 ###  Export the list of dashboards and respective GUIDs
 - Export the list of dashboards using GraphQL.
 
 - Usage: 
-    python3 dashboardList.py
+```python3 dashboardList.py```
 
 ###  Export the dashboards json data
 - Export all dashboards json using GraphQL.
 
 - Usage: 
-    python3 dashboardExport.py
+    `python3 dashboardExport.py`
