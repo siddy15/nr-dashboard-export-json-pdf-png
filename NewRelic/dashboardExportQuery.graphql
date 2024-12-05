@@ -1,0 +1,24 @@
+{
+  actor {
+    entity(guid: "%s") {
+      ... on DashboardEntity {
+        name
+        permissions
+        pages {
+          name
+          widgets {
+            visualization { id }
+            title
+            layout {
+              row
+              width
+              height
+              column
+            }
+            rawConfiguration
+          }
+        }
+      }
+    }
+  }
+}
