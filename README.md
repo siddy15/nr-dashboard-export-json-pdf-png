@@ -17,9 +17,11 @@
 ###  Export the list of dashboards and respective GUIDs
 - Export the list of dashboards using GraphQL.
 
-- Usage: python3 dashboardList.py
+- Usage: 
+    python3 dashboardList.py
 
 ###  Export the dashboards json data
 - Export all dashboards json using GraphQL.
 
-- Usage: python3 dashboardExport.py
+- Usage: 
+    python3 dashboardExport.py
