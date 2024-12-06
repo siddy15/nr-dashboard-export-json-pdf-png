@@ -5,10 +5,11 @@
   - Make use of output sheet to export the dashboards json file
 
 ### Installation 
-- Python is required as pre-requisite, the scripts are tested with latest Python version
+- Python is required as pre-requisite, the scripts are tested with latest Python version, here I am creating the viurtual environment and then installing the dependencies. 
     
       https://github.com/siddy15/nr-dashboard-export-json-pdf-png.git
       cd nr-entities-export-csv-json
+      python3 -m venv env
       pip3 install requests, openpyxl
     
 ### Set env variable API_KEY and export data
