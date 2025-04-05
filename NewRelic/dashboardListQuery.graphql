@@ -1,13 +1,12 @@
-{
+query($cursor: String) {
   actor {
-    entitySearch(queryBuilder: {type: DASHBOARD}) {
-      results {
+    entitySearch(query: "type = 'DASHBOARD'") {
+      results(cursor: $cursor) {
+        nextCursor
         entities {
-          ... on DashboardEntityOutline {
-            guid
-            name
-            accountId
-          }
+          guid
+          name
+          accountId
         }
       }
     }

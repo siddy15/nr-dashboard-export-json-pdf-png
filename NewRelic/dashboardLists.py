@@ -1,9 +1,10 @@
 import requests
 from openpyxl import Workbook
 import os
+import json
 
 endpoint = "https://api.newrelic.com/graphql"
-api_key = os.environ.get('API_KEY')  
+api_key = os.environ.get('API_KEY')
 output_excel = "dashboard_guids.xlsx"
 query_file = "dashboardListQuery.graphql"
 
@@ -12,31 +13,52 @@ def load_query(file_path):
         with open(file_path, "r") as file:
             return file.read()
     except FileNotFoundError:
-        print(f"Error: The query file '{file_path}' does not exist.")
+        print(f"Error: Query file '{file_path}' not found.")
         exit(1)
 
-def fetch_dashboard_data(query):
-    response = requests.post(
-        endpoint,
-        json={"query": query},
-        headers={"API-Key": api_key, "Content-Type": "application/json"},
-    )
-    if response.status_code == 200:
-        data = response.json()
+def fetch_all_dashboards(query):
+    all_dashboards = []
+    cursor = None
+
+    while True:
+        variables = {"cursor": cursor} if cursor else {}
+        payload = {
+            "query": query,
+            "variables": variables
+        }
+
+        response = requests.post(
+            endpoint,
+            headers={"API-Key": api_key, "Content-Type": "application/json"},
+            json=payload
+        )
+
+        if response.status_code != 200:
+            print(f"Request failed (status {response.status_code})")
+            print(response.text)
+            break
+
         try:
-            return data["data"]["actor"]["entitySearch"]["results"]["entities"]
-        except KeyError:
-            print("Error: Unexpected data format.")
-            return []
-    else:
-        print(f"Error: Request failed with status code {response.status_code}")
-        return []
+            data = response.json()
+            results = data["data"]["actor"]["entitySearch"]["results"]
+            dashboards = results.get("entities", [])
+            cursor = results.get("nextCursor")
+            all_dashboards.extend(dashboards)
+            print(f"Fetched {len(dashboards)} dashboards (Total so far: {len(all_dashboards)})")
+
+            if not cursor:
+                break  
+        except Exception as e:
+            print(f"Error processing response: {e}")
+            break
+
+    return all_dashboards
 
 def save_to_excel(data):
     filtered_data = [entity for entity in data if '/' in (entity.get("name") or '')]
 
     if not filtered_data:
-        print("No dashboard names contain '/'. No data saved.")
+        print("No dashboard names contain '/'. Nothing saved.")
         return
 
     workbook = Workbook()
@@ -52,18 +74,17 @@ def save_to_excel(data):
         ])
 
     workbook.save(output_excel)
-    print(f"Filtered data saved to '{output_excel}' with {len(filtered_data)} dashboards.")
+    print(f"Filtered dashboards saved to '{output_excel}' ({len(filtered_data)} entries).")
 
 if __name__ == "__main__":
     print("========== Loading GraphQL query ==========")
     query = load_query(query_file)
-    
-    print("========== Fetching dashboard data ==========")
-    dashboards = fetch_dashboard_data(query)
-    
+
+    print("========== Fetching dashboards with pagination ==========")
+    dashboards = fetch_all_dashboards(query)
+
     if dashboards:
-        total_dashboards = len(dashboards)
-        print(f"Total dashboards retrieved: {total_dashboards}")
+        print(f"Total dashboards retrieved: {len(dashboards)}")
         save_to_excel(dashboards)
     else:
         print("No dashboard data retrieved.")
